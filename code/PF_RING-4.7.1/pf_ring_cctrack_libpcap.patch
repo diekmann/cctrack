@@ -1,0 +1,52 @@
+Index: userland/libpcap-1.1.1-ring/pcap-linux.c
+===================================================================
+--- userland/libpcap-1.1.1-ring/pcap-linux.c	(Revision 1800)
++++ userland/libpcap-1.1.1-ring/pcap-linux.c	(Arbeitskopie)
+@@ -1174,11 +1174,46 @@
+ 		  pfring_set_cluster(handle->ring, atoi(clusterId), cluster_round_robin);
+ 	    
+ 	    pfring_set_poll_watermark(handle->ring, 1 /* watermark */);
++// TODO: HACK  INSERT CCTRACT_PLUGIN
++#define CCTRACK_PLUGIN_ID 42
++#define CCTRACK_RULE_ID 8
++	if (getenv("PCAP_ACTIVATE_CCTRACK_PLUGIN")) {
++		printf("Installing cctrack plugin filter rule.\n");
++	        filtering_rule rule;
++
++	        // Zeroing memory in order for it to work
++	        memset(&rule, 0, sizeof(filtering_rule));
++	        // Rule ID
++	        rule.rule_id = CCTRACK_RULE_ID;  // Rules are processed in order from lowest to higest id 
++	        // Rule action
++	        rule.rule_action = dont_forward_packet_and_stop_rule_evaluation;
++	        // Extended fields
++	        rule.extended_fields.filter_plugin_id = CCTRACK_PLUGIN_ID;
++
++	        // Add rule to ring
++	        int errorcode = pfring_add_filtering_rule(handle->ring, &rule);
++	        if (errorcode < 0)
++	        {
++	                printf("Error: Unable to add rule to pfring! Error code %d"
++	                                "\tSocket %d. Error message: %s\n",
++	                                errorcode, handle->ring->fd, strerror(errno));
++	                pfring_close(handle->ring);
++	                printf("Successfully closed device.\n");
++	                exit(-1);
++	        }
++	        else {
++	                printf("Successfully added rule to pfring.\n");
++		}
++	}
++// TODO: END HACK
++
+ 	  } else
+ 	    handle->ring = NULL;
+ 	} else
+           handle->ring = NULL;
+ 
++
++
+ 	if(handle->ring != NULL) {
+ 	  handle->fd = handle->ring->fd;
+ 	  handle->bufsize = handle->snapshot;
+

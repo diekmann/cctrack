@@ -1,0 +1,16 @@
+diff --git a/code/PF_RING-4.7.1/kernel/pf_ring.c b/code/PF_RING-4.7.1/kernel/pf_ring.c
+index f3900c0..b116df3 100644
+--- a/code/PF_RING-4.7.1/kernel/pf_ring.c
++++ b/code/PF_RING-4.7.1/kernel/pf_ring.c
+@@ -420,6 +420,11 @@ static inline void skb_reset_transport_header(struct sk_buff *skb)
+ 
+ static inline char* get_slot(struct pf_ring_socket *pfr, u_int32_t off) { return(&(pfr->ring_slots[off])); }
+ 
++
++/* ************* function by diekmann to read ring fill level ******************** */
++unsigned int pf_ring_get_min_num_slots(void){return min_num_slots;}
++EXPORT_SYMBOL(pf_ring_get_min_num_slots);
++
+ /* ********************************** */
+ 
+ static inline int get_next_slot_offset(struct pf_ring_socket *pfr, u_int32_t off, u_int32_t *real_off)

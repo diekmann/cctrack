@@ -1,0 +1,15 @@
+diff --git a/code/PF_RING-4.7.1/kernel/linux/pf_ring.h b/code/PF_RING-4.7.1/kernel/linux/pf_ring.h
+index cbed92a..3aa3ec4 100644
+--- a/code/PF_RING-4.7.1/kernel/linux/pf_ring.h
++++ b/code/PF_RING-4.7.1/kernel/linux/pf_ring.h
+@@ -963,6 +963,10 @@ struct pfring_hooks {
+ 
+ #ifdef PF_RING_PLUGIN
+ 
++
++/* ************* function by diekmann to read ring fill level ******************** */
++extern unsigned int pf_ring_get_min_num_slots(void);
++
+ extern void pf_ring_add_module_dependency(void);
+ static struct pfring_plugin_registration plugin_reg;
+ static struct list_head plugin_registered_devices_list;

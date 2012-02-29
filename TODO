@@ -1,0 +1,29 @@
+
+=== Ethernet header stats ===
+Currently the Ethernet header is exploited to contain additional stats about the sampling limit.
+See define DIRTY_STATS_HACK_ETHERNET_HDR
+Ethernet header: src sampling limit + this packet
+dst 0 <--> flow continues
+dst 1 <--> last packet
+
+
+=== Known Bugs ===
+= 1 =
+More ring_local_storages than actually required may be registered due to a race condition. This does not induce wrong behavior but wastes a small amount of memory.
+
+= 2 =
+dmesg starting output: "with a ring size of: ..."
+Is this number correct?
+(This is just a debug output)
+
+= 3 =
+Only tested with DEBUG defined. Be careful when starting for the first time as in theory an assertion could fail for every packet which fills your syslog and hard drive very fast.
+
+
+=== Requested Features ===
+Define a min_sampling_limit as module parameter. Currently hard-coded 64 Bytes.
+if(new_sampling_limit < 64) new_sampling_limit = 64;
+
+
+
+
