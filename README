@@ -1,0 +1,17 @@
+cctrack
+
+Adaptive Low-Level Packet Sampling for High-Speed Networks
+
+Documentation will soon appear
+
+
+This repo contains:
+ * a patched version of PF_RING from http://www.ntop.org/
+ * the patches to the original PF_RING
+   * code/PF_RING-4.7.1/pf_ring_cctrack_libpcap.patch
+   * code/PF_RING-4.7.1/pf_ring.c.patch
+   * code/PF_RING-4.7.1/pf_ring.h.patch
+ * cctrack kernel mode PF_RING plugin in code/PF_RING-4.7.1/kernel/plugins/
+   * must be loaded explicitely, depends on pf_ring.ko
+ * cctrack userland test applications in code/PF_RING-4.7.1/userland/cctrack/
+
