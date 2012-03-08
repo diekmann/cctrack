@@ -1,0 +1,17 @@
+The ixgbe DNA driver is a development sponsored by http://www.silicom-usa.com/. This
+code is free of charge, but it has been designed and developed for Silicom NICs based
+on the Intel chipset.
+
+In order to use it, you need 82598/99-based NIC manufactured by Silicom. In case you
+have none (or you have a non-Silicom 82598/99-based NIC), you can get an adapter
+at no cost for evaluation. You just need to go to
+
+      http://www.silicom-usa.com/default.asp?contentID=710
+
+and specify that you need an adapter for DNA.
+
+Shall you be unable to replace your adapter (e.g. you have a blade system) please
+contact us and well find a solution.
+
+-----
+Luca Deri <deri@ntop.org>

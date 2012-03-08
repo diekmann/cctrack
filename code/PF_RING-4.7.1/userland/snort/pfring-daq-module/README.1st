@@ -1,0 +1,36 @@
+PF_RING support of snort DAQ for snort 2.9 (and later)
+------------------------------------------------------
+
+
+Prerequisites
+-------------
+Make sure you have installed:
+-  snort with DAQ include files/libraries. You can
+   do that downloading snort and DAQ from http://www.snort.org/snort-downloads?
+- cd ~/PF_RING/kernel
+  sudo make install
+
+
+Compilation
+-----------
+# autoreconf -ivf
+# ./configure
+# make
+
+Installation
+------------
+You can do:
+# sudo cp .libs/daq_pfring.so into /usr/lib/daq/
+or
+# sudo make install
+
+if you want to run snort without installing it use "--daq-dir=./.libs"
+
+
+Running snort in IDS mode
+-------------------------
+# snort --daq-dir=/usr/lib/daq/ --daq pfring --daq-mode passive -i ethX -v -e
+
+----
+Luca Deri <deri@ntop.org> - July 2011
+

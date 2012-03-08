@@ -1,0 +1,56 @@
+PF_RING is a Linux kernel module and user-space framework that allows
+you to process packets at high-rates while providing you a consistent
+API for packet processing applications.
+
+Compilation
+-----------
+# make
+
+Installation
+------------
+# sudo su
+# cd kernel; make install
+# cd ../userland/lib; make install
+
+PF_RING-aware drivers
+---------------------
+In order to fully exploit PF_RING you need to use PF_RING aware drivers
+instead of vanilla ones. You can find these drivers in the drivers/
+directory. For exploiting their acceleration you need to play with
+the transparent mode as explained in
+http://www.ntop.org/blog/pf_ring/pf_ring-and-transparent_mode/
+
+Testing PF_RING
+---------------
+In PF_RING/userland/examples we have coded several applications you can use
+for testing PF_RING. In particular
+- pfcount allows you to capture packets
+- pfsend to replay (or generate) traffic
+
+You can look at the application source code for learning how you can use
+the PF_RING API.
+
+Remember that before running any appliction, you need to load the pf_ring.ko
+kernel modules:
+# sudo su
+# insmod ./kernel/pf_ring.ko
+
+DNA and PF_RING
+---------------
+DNA allows you to manipulate packets at wire speed in both 1 and 10 Gbit
+networks. In order to exploit it you need to use a DNA-aware driver such
+as the Intel 10 Gbit driver (see drivers/intel/ixgbe/ixgbe-xxxx-DNA). Once
+you have loaded the driver (you need to load the PF_RING kernel module
+prior to load the DNA-ixgbe module), PF_RING allows you to exploit DNA.
+
+Documentation
+-------------
+If you need an extensive documentation, you can refer to the manual that
+is stored in the doc/ directory.
+
+
+-------------------------------------
+June 2011 - Luca Deri <deri@ntop.org>
+
+
+

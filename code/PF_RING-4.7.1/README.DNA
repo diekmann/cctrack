@@ -1,0 +1,20 @@
+The PF_RING library is now able to handle DNA adapters simply using the prefix dna: before their name. Example "pfcount -i dna:eth1".
+
+With DNA you can dramatically increase the packet capture and transmission speed as the kernel layer is bypassed and applications can communicate directly with drivers.
+
+In order to exploit DNA, you need a DNA-aware driver. Currently two drivers are available:
+- e1000e (RX only)
+  The driver can be downloaded from the http://shop.ntop.org/ site.
+
+- ixgbe  (RX and TX)
+  The driver can be found in drivers/intel/ixgbe. Please refer to drivers/intel/ixgbe/README.DNA for additional information about this matter.
+
+With both drivers you can achieve wire rate at any packet size. You can test RX using the pfcount application, and TX using the pfsend application.
+
+IMPORTANT
+---------
+
+Note that in case of TX, the transmission speed is limited by the RX performance. This is because when the receiver cannot keep-up with the capture speed, the ethernet NIC sends ethernet PAUSE frames back to the sender to slow it down. If you want to ignore these frames and thus send at full speed, you need to disable autonegotiation and ignore them (ethtool -A eth? autoneg off rx off tx off).
+
+-------------------------
+Luca Deri <deri@ntop.org>

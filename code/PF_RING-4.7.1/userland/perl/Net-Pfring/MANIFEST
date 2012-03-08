@@ -1,0 +1,26 @@
+Artistic         the "Artistic License" from the perl 5.8 distribution
+AUTHORS          all the people who got dirty fingers on this module
+Changes          revision history file
+examples/test.pl further test script for general Perl Net-Pfring functionalities,
+                 also a valuable tutorial for the beginners
+FAQ              take a look at this file before posting
+GPL              GNU GENERAL PUBLIC LICENSE Version 3, June 2007
+Makefile.PL      Makefile generator
+MANIFEST         this file
+META.yml         Module meta-data (added by MakeMaker)
+NEWS             what's new in this module
+Pfring.pm        perl code for the Perl Net-Pfring extension module
+Pfring.xs        xs code for the Perl Net-Pfring extension module
+README           the most important file in the package.  please read
+t/00-boot.t      test script
+t/01-load.t      test script
+t/02-vars.t      test script
+t/03-api.t       test script
+t/04-open.t      test script
+t/05-close.t     test script
+t/06-next.t      test script
+t/07-stats.t      test script
+t/08-version.t   test script
+t/09-aliases.t   test script
+TODO             occasional notes about what is currently missing
+typemap          typemap file (see man perlapi)

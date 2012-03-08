@@ -1,0 +1,88 @@
+#
+# Makefile for both static and dynamic PF_RING user libraries
+#
+#
+
+#
+# Installation directory
+#
+INSTDIR   = @INSTALL_PREFIX@
+
+#
+# Search directories
+#
+INCLUDE   = -I../../kernel
+
+#
+# DNA
+#
+DNA_OBJS  = @DNA_OBJS@
+
+
+#
+# Virtual PF_RING
+#
+VIRTUAL_OBJS = @VIRTUAL_OBJS@
+
+#
+# DAG
+#
+DAG_OBJS  = @DAG_OBJS@
+
+#
+# Object files
+#
+OBJS      = pfring.o pfring_mod.o pfring_utils.o ${DNA_OBJS} ${VIRTUAL_OBJS} ${DAG_OBJS}
+
+#
+# C compiler and flags
+#
+#
+# CROSS_COMPILE=arm-mv5sft-linux-gnueabi-
+#
+CC        = ${CROSS_COMPILE}gcc
+CFLAGS    = -g  -Wall -fPIC ${INCLUDE} @HAVE_DNA@ @HAVE_VIRTUAL@ @HAVE_DAG@ @CFLAGS@
+LDFLAGS   = -g -shared
+
+SYSLIBS   = -lpthread 
+
+# How to make an object file
+%.o: %.c %.h
+#	@echo "=*= making object $@ =*="
+	${CC} ${CFLAGS} -c $< -o $@
+
+#
+# Main targets
+#
+STATICLIB  = libpfring.a
+DYNAMICLIB = libpfring.so
+TARGETS    = ${STATICLIB} ${DYNAMICLIB}
+RING_H     = ../../kernel/linux/pf_ring.h
+
+all: ${TARGETS}
+
+${STATICLIB}: Makefile @DNA_DEP@ @VIRTUAL_DEP@ ${OBJS} pfring.h ${RING_H}
+	@echo "=*= making library $@ =*="
+	ar rs $@ ${OBJS}
+	ranlib $@
+
+${DYNAMICLIB}: ${OBJS} @DNA_DEP@ @VIRTUAL_DEP@ pfring.h ${RING_H} Makefile
+	@echo "=*= making library $@ =*="
+	${CC} ${LDFLAGS} ${OBJS} ${SYSLIBS} -o $@
+
+extract_dna_lib:
+	ar x @DNA_LIB@
+
+extract_virtual_lib:
+	ar x @VIRTUAL_LIB@
+
+install: ${STATICLIB} ${DYNAMICLIB}
+	mkdir -p ${INSTDIR}/lib
+	mkdir -p ${INSTDIR}/include
+	cp ${STATICLIB} ${INSTDIR}/lib/
+	cp ${DYNAMICLIB} ${INSTDIR}/lib/
+	cp pfring.h ${INSTDIR}/include/
+	ldconfig
+
+clean:
+	@rm -f ${TARGETS} *.o *~

@@ -1,0 +1,8 @@
+We encourage you to use pfring-daq-module/ for snort 2.9.x
+
+Stable distributions of PF_RING-DAQ module can be found at 
+http://www.snort.org/snort-downloads/external-daq/ (search for
+PFRING External DAQ).
+
+-------------------------------------
+July 2011 - Luca Deri <deri@ntop.org>
