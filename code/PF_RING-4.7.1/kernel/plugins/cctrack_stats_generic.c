@@ -41,6 +41,7 @@ static atomic_t flowStats_num_stop_3; //
 static atomic_t flowStats_num_stop_4; // 
 static atomic_t flowStats_num_stop_5; // 
 static atomic_t flowStats_num_stop_6; // 
+static atomic_t flowStats_num_stop_morethan6; // 
 
 static void cctrack_stats_generic_flowStats_init(void) {
 	atomic_set(&flowStats_num_seen, 0);
@@ -50,6 +51,7 @@ static void cctrack_stats_generic_flowStats_init(void) {
 	atomic_set(&flowStats_num_stop_4, 0);
 	atomic_set(&flowStats_num_stop_5, 0);
 	atomic_set(&flowStats_num_stop_6, 0);
+	atomic_set(&flowStats_num_stop_morethan6, 0);
 }
 
 void cctrack_stats_generic_flowStats_new_flow(void) {
@@ -69,7 +71,9 @@ void cctrack_stats_generic_flowStats_flow_stop_duetosamplinglimit(uint32_t sampl
 		atomic_inc(&flowStats_num_stop_5);
 	}else if (sampling_limit <= 1000000){
 		atomic_inc(&flowStats_num_stop_6);
-	} 
+	} else {
+		atomic_inc(&flowStats_num_stop_morethan6);
+	}
 }
 
 /*** end flow statistics ***/
@@ -264,14 +268,15 @@ static int cctrack_seq_show(struct seq_file *s, void *v)
 	
 		/*** start flow statistics ***/
 		seq_printf(s, "# cctrack flow statistics\n");
-		seq_printf(s, "%d %d %d %d %d %d %d\n",
+		seq_printf(s, "%d %d %d %d %d %d %d %d\n",
 			atomic_read(&flowStats_num_seen),
 			atomic_read(&flowStats_num_stop_1),
 			atomic_read(&flowStats_num_stop_2),
 			atomic_read(&flowStats_num_stop_3),
 			atomic_read(&flowStats_num_stop_4),
 			atomic_read(&flowStats_num_stop_5),
-			atomic_read(&flowStats_num_stop_6)
+			atomic_read(&flowStats_num_stop_6),
+			atomic_read(&flowStats_num_stop_morethan6)
 			);
 		seq_printf(s, "# happy newline\n");
 		/*** end flow statistics ***/
