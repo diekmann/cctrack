@@ -130,12 +130,21 @@ int cctrack_init_new_ring_storage(u_short ring_pid, u_int32_t ring_id)
 
 }
 
+//#define HACK_ADDITONAL_INEFFICIENT_LOCKING_TO_PREVENT_INITIALIZATION_RACE_CONDITION
+#ifdef HACK_ADDITONAL_INEFFICIENT_LOCKING_TO_PREVENT_INITIALIZATION_RACE_CONDITION
+static DEFINE_SPINLOCK(ugly_cctrack_get_ring_storage_lock);
+#endif
 
 struct cctrack_per_ring_data * cctrack_get_ring_storage(u_short ring_pid,
 		u_int32_t ring_id)
 {
 	int i = 0;
 	int bucket_status;
+
+#ifdef HACK_ADDITONAL_INEFFICIENT_LOCKING_TO_PREVENT_INITIALIZATION_RACE_CONDITION
+    struct cctrack_per_ring_data *retval = NULL;
+    spin_lock(&ugly_cctrack_get_ring_storage_lock);
+#endif	
 
 	for(i=0; i<PER_RING_LOCAL_DATA_MAX; ++i){
 		bucket_status = atomic_read(&cctrack_per_ring.per_ring[i].status);
@@ -150,11 +159,21 @@ struct cctrack_per_ring_data * cctrack_get_ring_storage(u_short ring_pid,
 		if(bucket_status >= 2){
 			if(cctrack_per_ring.per_ring[i].ring_pid == ring_pid &&
 					cctrack_per_ring.per_ring[i].ring_id == ring_id){
+#ifdef HACK_ADDITONAL_INEFFICIENT_LOCKING_TO_PREVENT_INITIALIZATION_RACE_CONDITION
+				retval = cctrack_per_ring.per_ring[i].data;
+				break;
+#else
 				return cctrack_per_ring.per_ring[i].data;
+#endif
 			}
 		}
 	}
+#ifdef HACK_ADDITONAL_INEFFICIENT_LOCKING_TO_PREVENT_INITIALIZATION_RACE_CONDITION
+    spin_unlock(&ugly_cctrack_get_ring_storage_lock);
+    return retval;
+#else	
 	return NULL;
+#endif
 }
 
 
