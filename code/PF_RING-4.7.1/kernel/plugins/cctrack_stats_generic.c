@@ -326,14 +326,14 @@ static int cctrack_seq_show(struct seq_file *s, void *v)
 		//nothing
 	}
 
-
-	seq_printf(s, "%lu %d %d %llu%s %d\n",
+	
+	cctrack_assert((cctrack_stats_generic->stats[i].flags == 1) ?
+					num_pkts_below_limit > 0 : num_pkts_below_limit == 0);
+	seq_printf(s, "%lu %d %d %llu %d\n",
 			cctrack_stats_generic->stats[i].ts,
 			num_pkts,
 			num_pkts_sampled,
 			avg_sampling,
-			(cctrack_stats_generic->stats[i].flags == 1) ?
-					" !!sampling limit below threshold !!" : " no warning",
 			num_pkts_below_limit
 			);
 
