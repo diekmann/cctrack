@@ -949,19 +949,19 @@ static int cctrack_plugin_filter(struct pf_ring_socket *the_ring,
 	read_unlock(&this_ring_data->vars.lock);
 
 //TODO remove dirty hack
-#define DIRTY_STATS_HACK_ETHERNET_HDR
+//#define DIRTY_STATS_HACK_ETHERNET_HDR
 #ifdef DIRTY_STATS_HACK_ETHERNET_HDR
 {
 	int hacky_i;
 	uint32_t hacky_bytessampled;
-	int hack_cond;
+	uint32_t hack_cond;
 	for(hacky_i=0; hacky_i < ETH_ALEN; ++hacky_i){
 		hdr->extended_hdr.parsed_pkt.dmac[hacky_i]=0;
 		hdr->extended_hdr.parsed_pkt.smac[hacky_i]=0;
 	}
 
 	read_lock(&this_ring_data->vars.lock);
-	hack_cond = bucket->bytes_sampled + (hdr->caplen - hdr->extended_hdr.parsed_pkt.offset.l4_offset) > this_ring_data->vars.sampling_limit;
+	hack_cond = bucket->bytes_sampled + (hdr->caplen - hdr->extended_hdr.parsed_pkt.offset.l4_offset) > this_ring_data->vars.sampling_limit?1:0;
 	read_unlock(&this_ring_data->vars.lock);
 	//dst 0 == flow geht weiter
 	//dst 1 == letztes packet
