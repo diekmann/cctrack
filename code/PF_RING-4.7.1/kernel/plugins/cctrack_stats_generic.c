@@ -268,6 +268,7 @@ static int cctrack_seq_show(struct seq_file *s, void *v)
 	
 		/*** start flow statistics ***/
 		seq_printf(s, "# cctrack flow statistics\n");
+		seq_printf(s, "# seen <=65 <=512 <=1024 <=10000 <=100000 <=1000000 more\n");
 		seq_printf(s, "%d %d %d %d %d %d %d %d\n",
 			atomic_read(&flowStats_num_seen),
 			atomic_read(&flowStats_num_stop_1),
