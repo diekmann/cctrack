@@ -954,14 +954,14 @@ static int cctrack_plugin_filter(struct pf_ring_socket *the_ring,
 {
 	int hacky_i;
 	uint32_t hacky_bytessampled;
-	uint32_t hack_cond;
+	uint32_t hack_cond; // 1 iff flow stoped due to sampling limit
 	for(hacky_i=0; hacky_i < ETH_ALEN; ++hacky_i){
 		hdr->extended_hdr.parsed_pkt.dmac[hacky_i]=0;
 		hdr->extended_hdr.parsed_pkt.smac[hacky_i]=0;
 	}
 
 	read_lock(&this_ring_data->vars.lock);
-	hack_cond = bucket->bytes_sampled + (hdr->caplen - hdr->extended_hdr.parsed_pkt.offset.l4_offset) > this_ring_data->vars.sampling_limit?1:0;
+	hack_cond = (bucket->bytes_sampled + (hdr->caplen - hdr->extended_hdr.parsed_pkt.offset.l4_offset)) > this_ring_data->vars.sampling_limit?1:0;
 	read_unlock(&this_ring_data->vars.lock);
 	//dst 0 == flow geht weiter
 	//dst 1 == letztes packet
@@ -973,6 +973,22 @@ static int cctrack_plugin_filter(struct pf_ring_socket *the_ring,
 	memcpy(&hdr->extended_hdr.parsed_pkt.smac, &hacky_bytessampled, sizeof(hacky_bytessampled));
 }
 #endif /* DIRTY_STATS_HACK_ETHERNET_HDR */
+
+
+/*** start flow statistics ***/
+{// hacky
+	uint32_t hack_cond; // 1 iff flow stoped due to sampling limit
+	uint32_t hacky_sampling_limit;
+	
+	read_lock(&this_ring_data->vars.lock);
+	hacky_sampling_limit = this_ring_data->vars.sampling_limit;
+	hack_cond = (bucket->bytes_sampled + (hdr->caplen - hdr->extended_hdr.parsed_pkt.offset.l4_offset)) > hacky_sampling_limit?1:0;
+	read_unlock(&this_ring_data->vars.lock);
+	
+	if (hack_cond)
+		cctrack_stats_generic_flowStats_flow_stop_duetosamplinglimit(hacky_sampling_limit);
+}
+/*** end flow statistics ***/
 
 	if(cond){
 		/* stream completely sampled */

@@ -39,4 +39,14 @@ void cctrack_stats_generic_add_every_pkt(struct timeval *ts);
 void cctrack_stats_generic_add_sampled_pkt(struct timeval *ts,
 		uint32_t sampling_limit);
 
+
+/*** start flow statistics ***/
+// called when new flow is seen
+// this means called when new has-table entry is created
+void cctrack_stats_generic_flowStats_new_flow(void);
+
+// called when flow is stopped due to sampling limit exceedance
+void cctrack_stats_generic_flowStats_flow_stop_duetosamplinglimit(uint32_t sampling_limit);
+/*** end flow statistics ***/
+
 #endif /* CCTRACK_STATS_GENERIC_H_ */

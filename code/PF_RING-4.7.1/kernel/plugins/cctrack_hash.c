@@ -21,6 +21,7 @@
 
 #include "cctrack_hash.h"
 #include "cctrack_util.h"
+#include "cctrack_stats_generic.h" // new flow equals new ht entry
 
 
 /* ****************  local defines  ******************** */
@@ -573,6 +574,10 @@ bucket * cctrack_qiuConnection(struct cctrack_ht *ht, struct connection *con)
 #ifdef DEBUG_VERBOSE
 			printk("new connection\n");
 #endif
+			/*** start flow statistics ***/
+			cctrack_stats_generic_flowStats_new_flow();
+			/*** end flow statistics ***/
+			
 			if(free_entry != NULL){
 				entry = free_entry;
 			}

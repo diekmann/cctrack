@@ -32,6 +32,48 @@ ct_assert(__CCTRACK_STATS_GENERIC_SL_FIELD &&
 
 
 
+/*** start flow statistics ***/
+
+static atomic_t flowStats_num_seen; // number of seen flows
+static atomic_t flowStats_num_stop_1; // number of flows stopen with sampling limit below X_1
+static atomic_t flowStats_num_stop_2; //
+static atomic_t flowStats_num_stop_3; //
+static atomic_t flowStats_num_stop_4; // 
+static atomic_t flowStats_num_stop_5; // 
+static atomic_t flowStats_num_stop_6; // 
+
+static void cctrack_stats_generic_flowStats_init(void) {
+	atomic_set(&flowStats_num_seen, 0);
+	atomic_set(&flowStats_num_stop_1, 0);
+	atomic_set(&flowStats_num_stop_2, 0);
+	atomic_set(&flowStats_num_stop_3, 0);
+	atomic_set(&flowStats_num_stop_4, 0);
+	atomic_set(&flowStats_num_stop_5, 0);
+	atomic_set(&flowStats_num_stop_6, 0);
+}
+
+void cctrack_stats_generic_flowStats_new_flow(void) {
+	atomic_inc(&flowStats_num_seen); //TODO check overflow
+}
+
+void cctrack_stats_generic_flowStats_flow_stop_duetosamplinglimit(uint32_t sampling_limit) {
+	if (sampling_limit <= 65){
+		atomic_inc(&flowStats_num_stop_1);
+	}else if (sampling_limit <= 512){
+		atomic_inc(&flowStats_num_stop_2);
+	}else if (sampling_limit <= 1024){
+		atomic_inc(&flowStats_num_stop_3);
+	}else if (sampling_limit <= 10000){
+		atomic_inc(&flowStats_num_stop_4);
+	}else if (sampling_limit <= 100000){
+		atomic_inc(&flowStats_num_stop_5);
+	}else if (sampling_limit <= 1000000){
+		atomic_inc(&flowStats_num_stop_6);
+	} 
+}
+
+/*** end flow statistics ***/
+
 /* ****************  forward declarations  ******************** */
 static int cctrack_open(struct inode *inode, struct file *file);
 
@@ -219,6 +261,22 @@ static int cctrack_seq_show(struct seq_file *s, void *v)
 
 
 	if(i==0){
+	
+		/*** start flow statistics ***/
+		seq_printf(s, "# cctrack flow statistics\n");
+		seq_printf(s, "%d %d %d %d %d %d %d\n",
+			atomic_read(&flowStats_num_seen),
+			atomic_read(&flowStats_num_stop_1),
+			atomic_read(&flowStats_num_stop_2),
+			atomic_read(&flowStats_num_stop_3),
+			atomic_read(&flowStats_num_stop_4),
+			atomic_read(&flowStats_num_stop_5),
+			atomic_read(&flowStats_num_stop_6)
+			);
+		seq_printf(s, "# happy newline\n");
+		/*** end flow statistics ***/
+
+
 		seq_printf(s, "# cctrack generic stats\n");
 		if(cctrack_stats_generic->status == 0){
 			seq_printf(s, "# no errors logged\n");
@@ -313,6 +371,10 @@ int init_cctrack_stats_generic(void){
 
 
 	BUILD_BUG_ON_NOT_POWER_OF_2(__CCTRACK_STATS_GENERIC_SL_FIELD);
+	
+	/*** start flow statistics ***/
+	cctrack_stats_generic_flowStats_init();
+	/*** end flow statistics ***/
 
 	cctrack_stats_generic = vmalloc(sizeof(struct cctrack_stats_generic));
 	if(cctrack_stats_generic == NULL){
