@@ -133,6 +133,7 @@ static const char rcsid[] _U_ =
 #include <sys/mman.h>
 #include <linux/if.h>
 #include <netinet/in.h>
+#include <net/ethernet.h>
 #include <linux/if_ether.h>
 #include <net/if_arp.h>
 #include <poll.h>
@@ -356,6 +357,14 @@ static struct sock_filter	total_insn
 static struct sock_fprog	total_fcode
 	= { 1, &total_insn };
 #endif
+
+
+// TODO: HACK globals
+static FILE* statsFile = NULL;
+static uint64_t lastSecond = 0;
+static uint64_t bytesSeen = 0;
+static uint64_t packetsSeen = 0;
+static FILE* statsFileFlows = NULL;
 
 pcap_t *
 pcap_create(const char *device, char *ebuf)
@@ -1162,6 +1171,7 @@ pcap_activate_linux(pcap_t *handle)
 	if(!getenv("PCAP_NO_PF_RING")) {
 	  /* Code courtesy of Chris Wakelin <c.d.wakelin@reading.ac.uk> */
 	  char *clusterId;
+          char *appname;
 
 	  handle->ring = pfring_open((char*)device, handle->opt.promisc, handle->snapshot, 0);
 
@@ -1172,6 +1182,9 @@ pcap_activate_linux(pcap_t *handle)
 		  pfring_set_cluster(handle->ring, atoi(clusterId), cluster_per_flow);
 		else
 		  pfring_set_cluster(handle->ring, atoi(clusterId), cluster_round_robin);
+                if (appname =getenv("PCAP_PF_RING_APP_NAME")) {
+                   pfring_set_application_name(handle->ring, appname);
+                } 
 	    
 	    pfring_set_poll_watermark(handle->ring, 1 /* watermark */);
 // TODO: HACK  INSERT CCTRACT_PLUGIN
@@ -1203,6 +1216,28 @@ pcap_activate_linux(pcap_t *handle)
 	        }
 	        else {
 	                printf("Successfully added rule to pfring.\n");
+		}
+	}
+// TODO: END HACK
+// TODO: More Hack: insert statistics file if  PCAP_CCTRACK_STATS_FILE is set
+	char* statsFilename;
+	if (statsFile == NULL && NULL != (statsFilename = getenv("PCAP_CCTRACK_STATS_FILE"))) {
+		printf("Opening PCAP stats file\n");
+		
+		statsFile = fopen(statsFilename, "w+");
+		if (!statsFile) {
+			fprintf(stderr, "Could not open statistics file for PCAP statistics: %s\n", strerror(errno));
+			exit(-1);
+		}
+	}
+
+	char* statsFileFlowsName;
+	if (statsFileFlows == NULL && NULL != (statsFileFlowsName = getenv("PCAP_CCTRACK_STATS_FLOWS_FILE"))) {
+		printf("Opening PCAP Flow stats file: %s\n", statsFileFlowsName);
+		statsFileFlows = fopen(statsFileFlowsName, "w+");
+		if (!statsFileFlows) {
+			fprintf(stderr, "Could not open statistic file for flows statistics: %s\n", strerror(errno));
+			exit(-1);
 		}
 	}
 // TODO: END HACK
@@ -1430,6 +1465,37 @@ pcap_read_packet(pcap_t *handle, pcap_handler callback, u_char *userdata)
 	      pcap_header.caplen = min(pcap_header.caplen, handle->bufsize);
 	      caplen = pcap_header.caplen, packet_len = pcap_header.len;
 	      if(pcap_header.ts.tv_sec == 0) gettimeofday((struct timeval*)&pcap_header.ts, NULL);
+
+{// hacky
+// TODO: temporal hack, we have the sampling length encoded into the pf_Ring headers. we copy them to the
+// actuall ethernet header of the packet payload
+              struct ether_header *eth = (struct ether_header*)packet;
+              uint32_t limit = 0;
+              memcpy(&eth->ether_dhost, &pcap_header.extended_hdr.parsed_pkt.smac, sizeof(uint32_t));
+              memcpy(&limit, &pcap_header.extended_hdr.parsed_pkt.smac, sizeof(uint32_t));
+// TODO: print stats
+              uint32_t last_packet = 0;
+              memcpy(&last_packet, &pcap_header.extended_hdr.parsed_pkt.dmac, sizeof(last_packet));
+              if (last_packet != 0 && statsFileFlows) {
+			fprintf(statsFileFlows, "%u\n", limit);
+              }
+
+		if (statsFile && lastSecond > 0 && lastSecond < pcap_header.ts.tv_sec) {
+			fprintf(statsFile, "%llu %llu %llu\n", lastSecond, packetsSeen, bytesSeen);
+			// sanity check
+			if (pcap_header.ts.tv_sec > lastSecond + 30) {
+				fprintf(stderr, "ERROR: Detected a timeskew. Last Second: %llu. this second: %llu", lastSecond, pcap_header.ts.tv_sec);
+			} else {
+				lastSecond = pcap_header.ts.tv_sec;
+			}
+			packetsSeen = 0;
+			bytesSeen   = 0;
+		} else if (lastSecond == 0) {
+			lastSecond = pcap_header.ts.tv_sec;
+		}
+		bytesSeen += packet_len;
+		packetsSeen++;
+}
 	      break;
 	    }
 	  } while (packet_len == -1 && (errno == EINTR || errno == ENETDOWN));
@@ -3409,6 +3475,15 @@ pcap_cleanup_linux_mmap( pcap_t *handle )
 		handle->md.oneshot_buffer = NULL;
 	}
 	pcap_cleanup_linux(handle);
+	// TODO: statistics hack
+	if (statsFile) {
+		fclose(statsFile);
+		statsFile = NULL;
+	}
+	if (statsFileFlows) {
+		fclose(statsFileFlows);
+		statsFileFlows = NULL;
+	}
 }
 
 
