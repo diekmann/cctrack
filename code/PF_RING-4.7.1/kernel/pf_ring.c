@@ -1972,8 +1972,10 @@ inline int add_pkt_to_ring(struct sk_buff *skb,
 
   if((pfr->channel_id != RING_ANY_CHANNEL)
      && (channel_id != RING_ANY_CHANNEL)
-     && ((pfr->channel_id & the_bit) != the_bit))
+     && ((pfr->channel_id & the_bit) != the_bit)){
+     printk("the_bit printk debug!\n");
     return(0); /* Wrong channel */
+    }
 
   hdr->caplen = min_val(pfr->bucket_len - offset, hdr->caplen);
 
