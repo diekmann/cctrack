@@ -1967,8 +1967,10 @@ inline int add_pkt_to_ring(struct sk_buff *skb,
     printk("[PF_RING] --> add_pkt_to_ring(len=%d) [pfr->channel_id=%d][channel_id=%d]\n",
 	   hdr->len, pfr->channel_id, channel_id);
 
-  if((!pfr->ring_active) || (!skb))
+  if((!pfr->ring_active) || (!skb)){
+     printk("(!pfr->ring_active) || (!skb) printk debug!\n");
     return(0);
+  }
 
   if((pfr->channel_id != RING_ANY_CHANNEL)
      && (channel_id != RING_ANY_CHANNEL)
@@ -3007,9 +3009,11 @@ static int skb_ring_handler(struct sk_buff *skb,
 	    }
 	  }
 
-	  if(cluster_ptr->cluster.hashing_mode != cluster_round_robin)
+	  if(cluster_ptr->cluster.hashing_mode != cluster_round_robin){
+	  	//TODO HACK BUG
+	  	if (pfr != NULL) pfr->tot_fwd_ok++;
 	    break;
-	  else
+	  } else
 	    skb_hash = (skb_hash + 1) % cluster_ptr->cluster.num_cluster_elements;
 	}
       }
