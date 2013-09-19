@@ -2,7 +2,9 @@ cctrack
 
 Adaptive Low-Level Packet Sampling for High-Speed Networks
 
-Documentation will soon appear
+Documentation:
+Lothar Braun, Cornelius Diekmann, Nils Kammenhuber, and Georg Carle. Adaptive Load-Aware Sampling for Network Monitoring on Multicore Commodity Hardware. In IFIP Networking 2013, New York, NY, May 2013.
+pdf: http://www.net.in.tum.de/fileadmin/bibtex/publications/papers/braun_2013_adaptive_load_aware_sampling.pdf
 
 
 This repo contains:
